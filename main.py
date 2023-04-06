@@ -1,5 +1,6 @@
 import sqlite3
 from datetime import datetime, timedelta
+from Book import Book
 
 
 # 1.	Project should have a functioning menu. Done
@@ -16,7 +17,7 @@ from datetime import datetime, timedelta
 # o	The user should be able to rent one or more books in any combination of authors, titles, categories, etc. The quantity and availability of the book must be updated according to each renting transaction.
 # o	The application should generate and display a receipt stating the list of books selected and their return due dates (30 days from the rent day).
 
-
+# Creates database table with the following titles
 def create_table():
     conn = sqlite3.connect('library.db')
     c = conn.cursor()
@@ -31,6 +32,7 @@ def create_table():
     conn.close()
 
 
+# Inserts book info in the specify sections in the table
 def insert_data():
     conn = sqlite3.connect('library.db')
     c = conn.cursor()
@@ -49,6 +51,8 @@ def insert_data():
     conn.close()
 
 
+# Search function
+# Search through title,author or category to see if input contains the letter or word
 def search_books(query):
     conn = sqlite3.connect('library.db')
     c = conn.cursor()
@@ -60,6 +64,8 @@ def search_books(query):
     return books
 
 
+# Function for printing a book
+# Prints the book index position 0,1,2,3,4
 def print_books(books):
     if books:
         for book in books:
@@ -69,6 +75,7 @@ def print_books(books):
         print('No results found.')
 
 
+# Function that prints all the books in the database
 def print_database():
     conn = sqlite3.connect('library.db')
     c = conn.cursor()
@@ -77,22 +84,27 @@ def print_database():
     conn.close()
     print('\nBook Database:')
     for book in books:
-        print(f"Book id:{book[0]}\n" + f"Title: {book[1]}\n" +f"Author:{book[2]}\n" + f"Genre:{book[3]}\n" + f"Copies:{book[4]}\n")
+        print(
+            f"Book id:{book[0]}\n" + f"Title: {book[1]}\n" + f"Author:{book[2]}\n" + f"Genre:{book[3]}\n" + f"Copies:{book[4]}\n")
 
 
+# Function for saving a book if the user wants
+# Checks to if input id is equal to a book id and saves the book as a file
 def save_book():
     while True:
         book_id = input("Enter the id of the book you want to save (must be a number): ")
         if book_id.isdigit():
             conn = sqlite3.connect('library.db')
             c = conn.cursor()
-            c.execute("SELECT * FROM Books WHERE id=?", (book_id,))
+            c.execute('SELECT * FROM Books WHERE id=?', (book_id,))
             book = c.fetchone()
             conn.close()
+            # if book is found save the contents of the book in file
             if book:
                 with open(f"book_{book_id}.txt", "w") as f:
                     f.write(f"Title: {book[1]}\nAuthor: {book[2]}\nCategory: {book[3]}\nQuantity: {book[4]}")
                 print(f"Book {book[1]} saved to file book_{book_id}.txt")
+            #     if book is not found
             else:
                 print(f"No book found with id {book_id}")
             break
@@ -100,13 +112,16 @@ def save_book():
             print("Invalid input. Please enter a number.")
 
 
+# Function for renting a book or books
 def rent_books():
     print('\nRent Books:')
+    # Array to store books
     rented_books = []
     while True:
         book_id = input("Enter the id of the book you want to rent (must be a number, 'q' to quit): ")
         if book_id == 'q':
             break
+        #     input is not a number
         elif not book_id.isdigit():
             print("Invalid input. Please enter a number.")
             continue
@@ -114,18 +129,22 @@ def rent_books():
         c = conn.cursor()
         c.execute("SELECT * FROM Books WHERE id=?", (book_id,))
         book = c.fetchone()
+        # Not found prints not found
         if not book:
             print(f"No book found with id {book_id}")
             conn.close()
             continue
+        #  Converts book index position 4 to an integer and stores it in a tuple
         if not isinstance(book[4], int):
             book = list(book)
             book[4] = int(book[4])
             book = tuple(book)
+        #     When book is not available
         if book[4] == 0:
             print(f"Book {book_id} is not available for rent.")
             conn.close()
             continue
+        #     Asks how many copies
         rent_qty = input(f"How many copies of '{book[1]}' would you like to rent? ")
         if not rent_qty.isdigit():
             print("Invalid input. Please enter a number.")
@@ -136,23 +155,29 @@ def rent_books():
             print("Invalid input. Please enter a positive number.")
             conn.close()
             continue
+        #     If numbers of copies is greater than the copies trying to rent
         if rent_qty > book[4]:
             print(f"Only {book[4]} copies of '{book[1]}' are available for rent.")
             conn.close()
             continue
+        #  If there's enough copies of a book, calculates the due date of 30 days
         due_date = (datetime.now() + timedelta(days=30)).strftime('%Y-%m-%d')
+        # The list of tuples that stores the books details the user is renting
         rented_books.append((book[1], rent_qty, due_date))
+        # Updates the database of how many copies are left
         c.execute("UPDATE Books SET quantity=? WHERE id=?", (book[4] - rent_qty, book_id))
-        # display receipt
+    # Displays receipt for user
     if rented_books:
         print("\nRented Books:")
         for rented_book in rented_books:
             book_title, rent_qty, due_date = rented_book
+            # Prints the book details
             print(f"{book_title} - {rent_qty} copies, return date: {due_date}")
         conn.commit()
         conn.close()
 
 
+# Menu
 def menu():
     while True:
         print('\nLibrary Menu:')
@@ -162,17 +187,26 @@ def menu():
         print('4. Save Book')
         print('5. Quit')
         choice = input('Enter your choice: ')
-
+        # Option 1
         if choice == '1':
+            # Calls the print_database function
             print_database()
+        # Option 2
         elif choice == '2':
             query = input("Enter a search query: ")
+            # Calls the search_books function with the input query
             books = search_books(query)
+            # Calls the print_books function
             print_books(books)
+        # Option 3
         elif choice == '3':
+            # Calls the rent_books function
             rent_books()
+        # Option 4
         elif choice == '4':
+            # Calls the save_book function
             save_book()
+        # Option 5
         elif choice == '5':
             print('Goodbye!')
             break
