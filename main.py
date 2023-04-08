@@ -1,6 +1,5 @@
 import sqlite3
 from datetime import datetime, timedelta
-from Book import Book
 
 
 # 1.	Project should have a functioning menu. Done
@@ -11,7 +10,7 @@ from Book import Book
 # 6.	Project should make use of lists or dictionaries as appropriate.  Done
 # 7.	Project should follow adequate naming conventions for variables and functions and should have comments as appropriate.  Done
 
-# 8.	Project should use an object-oriented approach, (inheritance is optional)
+# 8.	Project should use an object-oriented approach, (inheritance is optional) Need to do
 # 9.	Project should use a database Done
 
 # o	The user should be able to rent one or more books in any combination of authors, titles, categories, etc. The quantity and availability of the book must be updated according to each renting transaction.
@@ -41,11 +40,19 @@ def insert_data():
     c.execute(
         "INSERT OR REPLACE INTO Books (title, author, category, quantity) VALUES ('HANG THE MOON', 'Jeannette Walls', 'fiction', 5)")
     c.execute(
-        "INSERT OR REPLACE INTO Books (title, author, category, quantity) VALUES ('GREENWOOD', 'Michael Christie', 'fiction', 5)")
+        "INSERT OR REPLACE INTO Books (title, author, category, quantity) VALUES ('IT ENDS WITH US', 'Colleen Hoover', 'fiction', 3)")
     c.execute(
         "INSERT OR REPLACE INTO Books (title, author, category, quantity) VALUES ('THE BEGGAR GARDEN', 'Michael Christie', 'fiction', 5)")
     c.execute(
-        "INSERT OR REPLACE INTO Books (title, author, category, quantity) VALUES ('IF HE HAD BEEN WITH ME', 'Laura Nowlin', 'fiction', 3)")
+        "INSERT OR REPLACE INTO Books (title, author, category, quantity) VALUES ('IF HE HAD BEEN WITH ME', 'Laura Nowlin', 'fiction', 5)")
+    c.execute(
+        "INSERT OR REPLACE INTO Books (title, author, category, quantity) VALUES ('TWISTED LOVE', 'Ana Huang', 'romance', 3)")
+    c.execute(
+        "INSERT OR REPLACE INTO Books (title, author, category, quantity) VALUES ('MEXICAN GOTHIC', 'Silvia Moreno-Garcia', 'romance', 3)")
+    c.execute(
+        "INSERT OR REPLACE INTO Books (title, author, category, quantity) VALUES ('THINGS WE HIDE FROM THE LIGHT', 'Lucy Score', 'romance', 3)")
+    c.execute(
+        "INSERT OR REPLACE INTO Books (title, author, category, quantity) VALUES ('VERITY', 'Colleen Hoover', 'fiction', 3)")
 
     conn.commit()
     conn.close()
@@ -119,7 +126,7 @@ def rent_books():
     rented_books = []
     while True:
         book_id = input("Enter the id of the book you want to rent (must be a number, 'q' to quit): ")
-        if book_id == 'q':
+        if book_id.lower() == 'q':
             break
         #     input is not a number
         elif not book_id.isdigit():
@@ -214,7 +221,6 @@ def menu():
             print('Invalid choice. Please try again.')
 
 
-if __name__ == '__main__':
-    create_table()
-    insert_data()
-    menu()
+create_table()
+insert_data()
+menu()
